@@ -1,29 +1,27 @@
 pipeline { 
- 
     agent { 
         node { 
             label 'master' 
         } 
     } 
- 
+
     tools {  
         maven 'maven3'  
     } 
- 
+
     options { 
         buildDiscarder logRotator(  
-                    daysToKeepStr: '15',  
-                    numToKeepStr: '10' 
-            ) 
+            daysToKeepStr: '15',  
+            numToKeepStr: '10' 
+        ) 
     } 
- 
+
     environment { 
         APP_NAME = "STUDENT_APP" 
         APP_ENV  = "DEV" 
     } 
- 
+
     stages { 
-         
         stage('Cleanup Workspace') { 
             steps { 
                 cleanWs() 
@@ -32,7 +30,7 @@ pipeline {
                 """ 
             } 
         } 
- 
+
         stage('Code Checkout') { 
             steps { 
                 checkout([ 
@@ -42,31 +40,31 @@ pipeline {
                 ]) 
             } 
         } 
- 
+
         stage('Code Build') { 
             steps { 
-                 sh 'mvn install -Dmaven.test.skip=false' 
+                sh 'mvn install -Dmaven.test.skip=false' 
             } 
         } 
- stage('Environment Analysis')
 
-      parallel {
-        stage('Printing All Global Variables') { 
-            steps { 
-                sh """ 
-                env 
-                """ 
+        stage('Environment Analysis') { 
+            parallel { 
+                stage('Printing All Global Variables') { 
+                    steps { 
+                        sh "env" 
+                    } 
+                } 
+                stage('Execute Shell') { 
+                    steps { 
+                        sh 'echo "Hello"' 
+                    } 
+                } 
+                stage('Print ENV variable') { 
+                    steps { 
+                        sh "echo ${APP_ENV}" 
+                    } 
+                } 
             } 
         } 
-      stage('Execute Shell') {
-           steps{
-             sh 'echo "Hello" '
-           }
-      }
-     stage('Print ENV variable') {
-         steps {
-             sh "echo ${APP_ENV}"
-         }
-     }
-    }    
-} 
+    } 
+}
